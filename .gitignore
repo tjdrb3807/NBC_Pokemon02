@@ -1,0 +1,86 @@
+# Xcode
+.DS_Store
+*.swp
+*.xcuserdatad
+*.xcuserdata
+*.xccheckout
+*.xcscmblueprint
+
+# Derived data
+DerivedData/
+.idea/
+*.hmap
+*.ipa
+*.dSYM
+
+# Build artifacts
+build/
+Build/
+*.app
+*.log
+
+# Swift Package Manager
+Packages/
+.swiftpm
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+
+# CocoaPods
+Pods/
+*.xcworkspace
+!Podfile
+!Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Firebase
+GoogleService-Info.plist
+
+# Archives
+*.xcarchive
+
+# Provisioning profiles
+*.mobileprovision
+
+# Debug files
+*.mode1v3
+*.mode2v3
+
+# Thumbnails
+*.moved-aside
+
+# Lock files
+Package.resolved
+project.xcworkspace/xcuserdata/
+
+# User-specific settings
+*.perspectivev3
+*.userworkspace
+
+# Core Data generated files
+*.mom
+*.momd
+*.plist
+
+# XCTest logs
+*.xccovreport
+*.xccovarchive
+
+# Swift Playgrounds
+timeline.xctimeline
+
+# IDE specific
+*.tmdocument
+*.swp
+
+# Temporary files
+*.tmp
+*.temp
