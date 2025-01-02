@@ -24,13 +24,13 @@ final class MainViewModel: ViewModel {
     }
     
     struct Output {
-        let thumbnailList: BehaviorSubject<[URL]>
+        let sectionSubject: BehaviorSubject<PokemonSectionModel>
     }
     
     private var currentPage = 0
     private let pageSize = 20
     
-    private let listSubject = BehaviorSubject<[URL]>(value: [])
+    private let sectionSubject = BehaviorSubject(value: PokemonSectionModel(items: []))
     
     var disposeBag = DisposeBag()
     
@@ -50,7 +50,7 @@ final class MainViewModel: ViewModel {
             }.subscribe()
             .disposed(by: disposeBag)
         
-        return Output(thumbnailList: listSubject)
+        return Output(sectionSubject: sectionSubject)
     }
     
     private func fetchNextPage() -> Observable<Void> {
@@ -74,9 +74,10 @@ final class MainViewModel: ViewModel {
             .do(onNext: { [weak self] newUrls in
                 guard let self = self else { return }
                 
-                var currentList = try self.listSubject.value()
-                currentList.append(contentsOf: newUrls)
-                self.listSubject.onNext(currentList)
+                var currentSection = try sectionSubject.value()
+                currentSection.items.append(contentsOf: newUrls)
+                
+                self.sectionSubject.onNext(currentSection)
                 self.currentPage += 1
             }).map { _ in () }
     }
