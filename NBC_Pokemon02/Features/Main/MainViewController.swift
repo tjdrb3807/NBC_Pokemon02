@@ -25,7 +25,12 @@ final class MainViewController: BaseViewController {
     
     override func bind() {
         let input = MainViewModel.Input(
-            viewWillAppear: self.rx.viewWillAppear.asObservable()
+            viewWillAppear: self.rx.viewWillAppear.asObservable(),
+            loadNextPageTrigger: collectionView.rx.didScroll
+                .withUnretained(self)
+                .filter { vc, _ in
+                    vc.isNearBottom()
+                }.map { _ in () }
         )
         
         let output = viewModel.transform(input: input)
@@ -62,6 +67,13 @@ final class MainViewController: BaseViewController {
         layout.sectionInset = UIEdgeInsets(top: spacing, left: horizontalPadding, bottom: spacing, right: horizontalPadding)
         
         return layout
+    }
+    
+    private func isNearBottom() -> Bool {
+        let contentOffsetY = collectionView.contentOffset.y
+        let maximumOffset = collectionView.contentSize.height - collectionView.frame.size.height
+        
+        return maximumOffset - contentOffsetY <= 200
     }
 }
 
