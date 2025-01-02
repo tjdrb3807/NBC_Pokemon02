@@ -9,16 +9,43 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
+import RxDataSources
 
 final class MainViewController: BaseViewController {
     let viewModel = MainViewModel()
+    
+    let dataSource = RxCollectionViewSectionedReloadDataSource<PokemonSectionModel>(
+        configureCell: { _, collectionView, indexPath, item in
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: PokemonCell.identifier,
+                for: indexPath) as? PokemonCell else { return UICollectionViewCell() }
+            
+            cell.configure(with: item)
+            
+            return cell
+        },
+        configureSupplementaryView: { _, collectionView, kind, indexPath in
+            if kind == UICollectionView.elementKindSectionHeader {
+                guard let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: PokemonHeaderView.identifier,
+                    for: indexPath) as? PokemonHeaderView else { return UICollectionReusableView() }
+                
+                return header
+            }
+            
+            return UICollectionReusableView()
+        })
     
     private lazy var collectionView: UICollectionView = {
         let layout = createFlowLayout(itemPerRow: 3.0, spacing: 10.0, horizontalPadding: 10.0)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         
+        collectionView.register(PokemonHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: PokemonHeaderView.identifier)
         collectionView.register(PokemonCell.self, forCellWithReuseIdentifier: PokemonCell.identifier)
         collectionView.backgroundColor = UIColor.darkRed
+        
+        collectionView.rx.setDelegate(self).disposed(by: disposeBag)
         
         return collectionView
     }()
@@ -35,12 +62,10 @@ final class MainViewController: BaseViewController {
         
         let output = viewModel.transform(input: input)
         
-        output.thumbnailList
-            .bind(to: collectionView.rx.items(
-                cellIdentifier: PokemonCell.identifier,
-                cellType: PokemonCell.self)) { _, url, cell in
-                    cell.configure(with: url)
-                }.disposed(by: disposeBag)
+        output.sectionSubject
+            .map { [$0] }
+            .bind(to: collectionView.rx.items(dataSource: dataSource))
+            .disposed(by: disposeBag)
     }
     
     override func configureUI() {
@@ -82,6 +107,14 @@ extension Reactive where Base: UIViewController {
         let source = self.methodInvoked(#selector(Base.viewWillAppear)).map { _ in }
         
         return ControlEvent(events: source)
+    }
+}
+
+extension MainViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 150)
     }
 }
 
