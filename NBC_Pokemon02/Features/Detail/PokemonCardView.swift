@@ -49,7 +49,6 @@ final class PokemonCardView: UIView {
     
     private let numberLabel: UILabel = {
         let label = UILabel()
-        label.text = "No.54"
         label.textColor = .white
         label.font = .systemFont(ofSize: 25.0, weight: .bold)
     
@@ -58,7 +57,6 @@ final class PokemonCardView: UIView {
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "고라파덕"
         label.textColor = .white
         label.font = .systemFont(ofSize: 25.0, weight: .bold)
         
@@ -67,7 +65,6 @@ final class PokemonCardView: UIView {
     
     private let typeLabel: UILabel = {
         let label = UILabel()
-        label.text = "타입: 물"
         label.textColor = .white
         label.font = .systemFont(ofSize: 20.0, weight: .semibold)
         
@@ -76,7 +73,6 @@ final class PokemonCardView: UIView {
     
     private let heightLabel: UILabel = {
         let label = UILabel()
-        label.text = "타입: 물"
         label.textColor = .white
         label.font = .systemFont(ofSize: 20.0, weight: .semibold)
         
@@ -85,7 +81,6 @@ final class PokemonCardView: UIView {
     
     private let weightLabel: UILabel = {
         let label = UILabel()
-        label.text = "타입: 물"
         label.textColor = .white
         label.font = .systemFont(ofSize: 20.0, weight: .semibold)
         
