@@ -7,6 +7,7 @@
 
 import Foundation
 import RxSwift
+import RxCocoa
 
 protocol ViewModel {
     associatedtype Input
@@ -25,14 +26,14 @@ final class MainViewModel: ViewModel {
     }
     
     struct Output {
-        let sectionSubject: BehaviorSubject<PokemonSectionModel>
+        let sectionSubject: BehaviorRelay<PokemonSectionModel>
         let detailViewModel: Observable<DetailViewModel>
     }
     
     private var currentPage = 0
     private let pageSize = 20
-    private let isLoding = BehaviorSubject<Bool>(value: false)
-    private let sectionSubject = BehaviorSubject(value: PokemonSectionModel(items: []))
+    private let isLoading = BehaviorRelay<Bool>(value: false)
+    private let sectionRelay = BehaviorRelay(value: PokemonSectionModel(items: []))
     
     var disposeBag = DisposeBag()
     
@@ -54,17 +55,17 @@ final class MainViewModel: ViewModel {
             .disposed(by: disposeBag)
         
         let detailViewModel = input.selectedItem
-            .withLatestFrom(sectionSubject) {
+            .withLatestFrom(sectionRelay) {
                 PokemonDetail(id: $0 + 1, imageURL: $1.items[$0])
             }.map {
                 DetailViewModel(model: $0)
             }
 
-        return Output(sectionSubject: sectionSubject,
+        return Output(sectionSubject: sectionRelay,
                       detailViewModel: detailViewModel)
     }
     
-    private func canLoadNextPage() -> Bool { (try? !isLoding.value()) ?? false }
+    private func canLoadNextPage() -> Bool { !isLoading.value }
     
     private func fetchNextPage() -> Observable<Void> {
         let offset = currentPage * pageSize
@@ -72,7 +73,7 @@ final class MainViewModel: ViewModel {
             return Observable.error(NetworkError.invalidURL)
         }
         
-        isLoding.onNext(true)
+        isLoading.accept(true)
         
         return NetworkManager.shared.fetch(url: url)
             .observe(on: SerialDispatchQueueScheduler(qos: .default))
@@ -89,13 +90,13 @@ final class MainViewModel: ViewModel {
             .do(onNext: { [weak self] newUrls in
                 guard let self = self else { return }
                 
-                var currentSection = try sectionSubject.value()
+                var currentSection = sectionRelay.value
                 currentSection.items.append(contentsOf: newUrls)
                 
-                self.sectionSubject.onNext(currentSection)
+                self.sectionRelay.accept(currentSection)
                 self.currentPage += 1
             }, onDispose: { [weak self] in
-                self?.isLoding.onNext(false)
+                self?.isLoading.accept(false)
             }).map { _ in () }
     }
 }
