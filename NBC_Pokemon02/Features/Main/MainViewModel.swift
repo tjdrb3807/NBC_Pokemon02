@@ -72,7 +72,7 @@ final class MainViewModel: ViewModel {
             return Observable.error(NetworkError.invalidURL)
         }
         
-        print(url)
+        isLoding.onNext(true)
         
         return NetworkManager.shared.fetch(url: url)
             .observe(on: SerialDispatchQueueScheduler(qos: .default))
@@ -94,6 +94,8 @@ final class MainViewModel: ViewModel {
                 
                 self.sectionSubject.onNext(currentSection)
                 self.currentPage += 1
+            }, onDispose: { [weak self] in
+                self?.isLoding.onNext(false)
             }).map { _ in () }
     }
 }

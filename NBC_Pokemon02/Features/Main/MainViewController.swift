@@ -115,7 +115,7 @@ final class MainViewController: BaseViewController {
         let contentOffsetY = collectionView.contentOffset.y
         let maximumOffset = collectionView.contentSize.height - collectionView.frame.size.height
         
-        return maximumOffset - contentOffsetY <= 200
+        return maximumOffset - contentOffsetY <= 300
     }
 }
 
