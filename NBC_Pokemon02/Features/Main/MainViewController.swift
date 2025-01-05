@@ -52,6 +52,10 @@ final class MainViewController: BaseViewController {
         return collectionView
     }()
     
+    override func viewWillAppear(_ animated: Bool) {
+        navigationController?.navigationBar.isHidden = true
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
