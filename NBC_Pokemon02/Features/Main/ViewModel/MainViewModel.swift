@@ -9,15 +9,6 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-protocol ViewModel {
-    associatedtype Input
-    associatedtype Output
-    
-    var disposeBag: DisposeBag { get set }
-    
-    func transform(input: Input) -> Output
-}
-
 final class MainViewModel: ViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
