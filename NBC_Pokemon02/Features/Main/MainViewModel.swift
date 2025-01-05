@@ -31,7 +31,7 @@ final class MainViewModel: ViewModel {
     
     private var currentPage = 0
     private let pageSize = 20
-    
+    private let isLoding = BehaviorSubject<Bool>(value: false)
     private let sectionSubject = BehaviorSubject(value: PokemonSectionModel(items: []))
     
     var disposeBag = DisposeBag()
@@ -47,7 +47,8 @@ final class MainViewModel: ViewModel {
         
         input.loadNextPageTrigger
             .withUnretained(self)
-            .flatMap { vm, _ in
+            .filter { vm, _ in vm.canLoadNextPage() }
+            .flatMapLatest { vm, _ in
                 vm.fetchNextPage()
             }.subscribe()
             .disposed(by: disposeBag)
@@ -63,11 +64,15 @@ final class MainViewModel: ViewModel {
                       detailViewModel: detailViewModel)
     }
     
+    private func canLoadNextPage() -> Bool { (try? !isLoding.value()) ?? false }
+    
     private func fetchNextPage() -> Observable<Void> {
         let offset = currentPage * pageSize
         guard let url = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=\(pageSize)&offset=\(offset)") else {
             return Observable.error(NetworkError.invalidURL)
         }
+        
+        print(url)
         
         return NetworkManager.shared.fetch(url: url)
             .observe(on: SerialDispatchQueueScheduler(qos: .default))
