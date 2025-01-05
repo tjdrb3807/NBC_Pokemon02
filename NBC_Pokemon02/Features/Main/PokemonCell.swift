@@ -14,6 +14,7 @@ final class PokemonCell: UICollectionViewCell {
     private let thumbnailImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
+        imageView.kf.indicatorType = .activity
         
         return imageView
     }()
@@ -39,6 +40,12 @@ final class PokemonCell: UICollectionViewCell {
     }
     
     func configure(with url: URL) {
-        thumbnailImageView.kf.setImage(with: url)
+        thumbnailImageView.kf.setImage(
+            with: url,
+            options: [
+                .transition(.fade(0.2)),
+                .cacheOriginalImage
+            ]
+        )
     }
 }
