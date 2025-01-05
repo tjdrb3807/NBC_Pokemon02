@@ -14,8 +14,10 @@ import RxDataSources
 final class MainViewController: BaseViewController {
     private let viewModel = MainViewModel()
     
+    /// 화면이 초기화 되었는지 확인하는 플래그
     private var isRead: Bool = false
     
+    /// RxDataSources를 사용하여 CollectionView의 데이터를 구성
     let dataSource = RxCollectionViewSectionedReloadDataSource<PokemonSectionModel>(
         configureCell: { _, collectionView, indexPath, item in
             guard let cell = collectionView.dequeueReusableCell(
@@ -76,11 +78,13 @@ final class MainViewController: BaseViewController {
         
         let output = viewModel.transform(input: input)
         
+        /// CollectionView와 데이터 바인딩
         output.sectionSubject
             .map { [$0] }
             .bind(to: collectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
+        /// 선택된 아이템에 따라 DetailViewController로 이동
         output.detailViewModel
             .withUnretained(self)
             .subscribe(onNext: { vc, viewModel in
@@ -102,6 +106,15 @@ final class MainViewController: BaseViewController {
         }
     }
     
+    /**
+     아이템 수, 간격, 여백을 기반으로 UICollectionViewFlowLayout을 생성합니다.
+     
+     - Parameters:
+     - itemPerRow: 한 행에 표시할 아이템 수
+     - spacing: 아이템 간의 간격
+     - horizontalPadding: 레이아웃의 좌우 여백
+     - Returns: 설정된 UICollectionViewFlowLayout 인스턴스
+     */
     private func createFlowLayout(itemPerRow: CGFloat, spacing: CGFloat, horizontalPadding: CGFloat) -> UICollectionViewFlowLayout {
         let layout = UICollectionViewFlowLayout()
         let totalSpacing = spacing * (itemPerRow - 1) + (horizontalPadding * 2)
@@ -115,6 +128,11 @@ final class MainViewController: BaseViewController {
         return layout
     }
     
+    /**
+     CollectionView가 하단에 가까운지 여부를 확인합니다.
+     
+     - Returns: 하단에 가까우면 true, 그렇지 않으면 false
+     */
     private func isNearBottom() -> Bool {
         let contentOffsetY = collectionView.contentOffset.y
         let maximumOffset = collectionView.contentSize.height - collectionView.frame.size.height

@@ -29,6 +29,7 @@ final class MainViewModel: ViewModel {
     var disposeBag = DisposeBag()
     
     func transform(input: Input) -> Output {
+        // 화면이 나타날 때 첫 페이지를 로드
         input.viewWillAppear
             .take(1)
             .withUnretained(self)
@@ -37,6 +38,7 @@ final class MainViewModel: ViewModel {
             }.subscribe()
             .disposed(by: disposeBag)
         
+        // 스크롤 이벤트로 다음 페이지를 로드
         input.loadNextPageTrigger
             .withUnretained(self)
             .filter { vm, _ in vm.canLoadNextPage() }
@@ -45,19 +47,27 @@ final class MainViewModel: ViewModel {
             }.subscribe()
             .disposed(by: disposeBag)
         
+        // 선택된 아이템의 디테일 ViewModel 생성
         let detailViewModel = input.selectedItem
-            .withLatestFrom(sectionRelay) {
-                PokemonDetail(id: $0 + 1, imageURL: $1.items[$0])
-            }.map {
-                DetailViewModel(model: $0)
-            }
+            .withLatestFrom(sectionRelay) { PokemonDetail(id: $0 + 1, imageURL: $1.items[$0])}
+            .map { DetailViewModel(model: $0) }
 
         return Output(sectionSubject: sectionRelay,
                       detailViewModel: detailViewModel)
     }
     
+    /**
+     다음 페이지를 로드할 수 있는지 확인합니다.
+     
+     - Returns: 로딩 가능 여부
+     */
     private func canLoadNextPage() -> Bool { !isLoading.value }
     
+    /**
+     다음 페이지의 데이터를 서버에서 가져옵니다.
+     
+     - Returns: Void Observable
+     */
     private func fetchNextPage() -> Observable<Void> {
         let offset = currentPage * pageSize
         guard let url = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=\(pageSize)&offset=\(offset)") else {
@@ -81,6 +91,7 @@ final class MainViewModel: ViewModel {
             .do(onNext: { [weak self] newUrls in
                 guard let self = self else { return }
                 
+                // 새로운 URL 데이터를 기존 데이터에 추가
                 var currentSection = sectionRelay.value
                 currentSection.items.append(contentsOf: newUrls)
                 
@@ -93,6 +104,13 @@ final class MainViewModel: ViewModel {
 }
 
 extension MainViewModel {
+    /**
+     API에서 가져온 URL을 썸네일 URL로 변환합니다.
+     
+     - Parameters:
+     - url: 원본 URL
+     - Returns: 썸네일 URL
+     */
     func convertToThumbnailURL(from url: URL) -> URL? {
         guard let lastComponent = url.pathComponents.last,
               let id = Int(lastComponent) else { return nil }

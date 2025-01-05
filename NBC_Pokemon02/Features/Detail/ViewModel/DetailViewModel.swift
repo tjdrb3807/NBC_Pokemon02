@@ -31,6 +31,7 @@ final class DetailViewModel: ViewModel {
             .flatMap { vm, _ in
                 NetworkManager.shared.fetch(url: URL(string: "https://pokeapi.co/api/v2/pokemon/\(vm.model.id)/")!)
             }.map { (response: PokemonDetailResponse) -> PokemonDetail in
+                // 응답 데이터를 기반으로 모델 업데이트
                 var updateModel = self.model
                 updateModel.name = response.name
                 updateModel.type = response.types?.first?.type.name
