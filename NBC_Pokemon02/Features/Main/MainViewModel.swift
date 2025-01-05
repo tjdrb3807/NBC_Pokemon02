@@ -21,10 +21,12 @@ final class MainViewModel: ViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let loadNextPageTrigger: Observable<Void>
+        let selectedItem: Observable<Int>
     }
     
     struct Output {
         let sectionSubject: BehaviorSubject<PokemonSectionModel>
+        let detailViewModel: Observable<DetailViewModel>
     }
     
     private var currentPage = 0
@@ -49,8 +51,16 @@ final class MainViewModel: ViewModel {
                 vm.fetchNextPage()
             }.subscribe()
             .disposed(by: disposeBag)
+        
+        let detailViewModel = input.selectedItem
+            .withLatestFrom(sectionSubject) {
+                PokemonDetail(id: $0 + 1, imageURL: $1.items[$0])
+            }.map {
+                DetailViewModel(model: $0)
+            }
 
-        return Output( sectionSubject: sectionSubject )
+        return Output(sectionSubject: sectionSubject,
+                      detailViewModel: detailViewModel)
     }
     
     private func fetchNextPage() -> Observable<Void> {

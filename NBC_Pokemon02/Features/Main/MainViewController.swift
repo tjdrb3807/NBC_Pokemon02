@@ -66,7 +66,8 @@ final class MainViewController: BaseViewController {
                 .withUnretained(self)
                 .filter { vc, _ in
                     vc.isRead && vc.isNearBottom()
-                }.map { _ in () }
+                }.map { _ in () },
+            selectedItem: collectionView.rx.itemSelected.map { $0.row }
         )
         
         let output = viewModel.transform(input: input)
@@ -75,6 +76,13 @@ final class MainViewController: BaseViewController {
             .map { [$0] }
             .bind(to: collectionView.rx.items(dataSource: dataSource))
             .disposed(by: disposeBag)
+        
+        output.detailViewModel
+            .withUnretained(self)
+            .subscribe(onNext: { vc, viewModel in
+                let detailVC = DetailViewController(viewModel: viewModel)
+                vc.navigationController?.pushViewController(detailVC, animated: true)
+            }).disposed(by: disposeBag)
     }
     
     override func configureUI() {
