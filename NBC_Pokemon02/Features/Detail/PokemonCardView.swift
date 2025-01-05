@@ -47,45 +47,11 @@ final class PokemonCardView: UIView {
         return stackView
     }()
     
-    private let numberLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 25.0, weight: .bold)
-    
-        return label
-    }()
-    
-    private let nameLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 25.0, weight: .bold)
-        
-        return label
-    }()
-    
-    private let typeLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 20.0, weight: .semibold)
-        
-        return label
-    }()
-    
-    private let heightLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 20.0, weight: .semibold)
-        
-        return label
-    }()
-    
-    private let weightLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 20.0, weight: .semibold)
-        
-        return label
-    }()
+    private let numberLabel = UILabel.makeLabel(fontSize: 25.0, weight: .bold)
+    private let nameLabel = UILabel.makeLabel(fontSize: 25.0, weight: .bold)
+    private let typeLabel = UILabel.makeLabel(fontSize: 20.0, weight: .semibold)
+    private let heightLabel = UILabel.makeLabel(fontSize: 20.0, weight: .semibold)
+    private let weightLabel = UILabel.makeLabel(fontSize: 20.0, weight: .semibold)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -104,13 +70,19 @@ final class PokemonCardView: UIView {
         let formattedHeight = String(format: "%.1f", Double(model.height ?? 0) / 10.0)
         let formattedWeight = String(format: "%.1f", Double(model.weight ?? 0) / 10.0)
 
+        imageView.kf.setImage(
+            with: model.imageURL,
+            options: [
+                .transition(.fade(0.2)),
+                .cacheOriginalImage
+            ]
+        )
+        numberLabel.text = "No.\(model.id)"
+        nameLabel.text = koreanName
+        typeLabel.text = "타입: \(typeName)"
         
-        imageView.kf.setImage(with: model.imageURL)
-        numberLabel.rx.text.onNext("No.\(model.id)")
-        nameLabel.rx.text.onNext(koreanName)
-        typeLabel.rx.text.onNext("타입: \(typeName)")
-        heightLabel.rx.text.onNext("키: \(formattedHeight) m")
-        weightLabel.rx.text.onNext("몸무게: \(formattedWeight) kg")
+        heightLabel.setFormattedText("키: ", value: formattedHeight, suffix: " m")
+        weightLabel.setFormattedText("몸무게: ", value: formattedWeight, suffix: " kg")
     }
     
     private func configureUI() {
