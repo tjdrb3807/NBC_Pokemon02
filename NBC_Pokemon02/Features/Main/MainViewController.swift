@@ -12,7 +12,9 @@ import RxCocoa
 import RxDataSources
 
 final class MainViewController: BaseViewController {
-    let viewModel = MainViewModel()
+    private let viewModel = MainViewModel()
+    
+    private var isRead: Bool = false
     
     let dataSource = RxCollectionViewSectionedReloadDataSource<PokemonSectionModel>(
         configureCell: { _, collectionView, indexPath, item in
@@ -50,13 +52,20 @@ final class MainViewController: BaseViewController {
         return collectionView
     }()
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        isRead = true
+    }
+    
     override func bind() {
         let input = MainViewModel.Input(
             viewWillAppear: self.rx.viewWillAppear.asObservable(),
             loadNextPageTrigger: collectionView.rx.didScroll
+                .throttle(.milliseconds(200), scheduler: MainScheduler.instance)
                 .withUnretained(self)
                 .filter { vc, _ in
-                    vc.isNearBottom()
+                    vc.isRead && vc.isNearBottom()
                 }.map { _ in () }
         )
         
@@ -98,7 +107,7 @@ final class MainViewController: BaseViewController {
         let contentOffsetY = collectionView.contentOffset.y
         let maximumOffset = collectionView.contentSize.height - collectionView.frame.size.height
         
-        return maximumOffset - contentOffsetY <= 200
+        return maximumOffset - contentOffsetY <= 100
     }
 }
 

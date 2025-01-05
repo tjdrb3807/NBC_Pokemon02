@@ -49,8 +49,8 @@ final class MainViewModel: ViewModel {
                 vm.fetchNextPage()
             }.subscribe()
             .disposed(by: disposeBag)
-        
-        return Output(sectionSubject: sectionSubject)
+
+        return Output( sectionSubject: sectionSubject )
     }
     
     private func fetchNextPage() -> Observable<Void> {
