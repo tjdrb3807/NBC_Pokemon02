@@ -119,14 +119,6 @@ final class MainViewController: BaseViewController {
     }
 }
 
-extension Reactive where Base: UIViewController {
-    var viewWillAppear: ControlEvent<Void> {
-        let source = self.methodInvoked(#selector(Base.viewWillAppear)).map { _ in }
-        
-        return ControlEvent(events: source)
-    }
-}
-
 extension MainViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
