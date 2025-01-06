@@ -25,6 +25,13 @@ final class PokemonCell: UICollectionViewCell {
         self.configureUI()
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        thumbnailImageView.image = nil
+        thumbnailImageView.kf.cancelDownloadTask()
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
