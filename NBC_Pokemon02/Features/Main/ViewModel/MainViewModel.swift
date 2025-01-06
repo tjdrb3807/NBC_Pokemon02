@@ -14,6 +14,7 @@ final class MainViewModel: ViewModel {
         let viewWillAppear: Observable<Void>
         let loadNextPageTrigger: Observable<Void>
         let selectedItem: Observable<Int>
+        let prefetchTrigger: Observable<[IndexPath]>
     }
     
     struct Output {
@@ -23,6 +24,7 @@ final class MainViewModel: ViewModel {
     
     private var currentPage = 0
     private let pageSize = 20
+    private var currentItemCount: Int { sectionRelay.value.items.count }
     private let isLoading = BehaviorRelay<Bool>(value: false)
     private let sectionRelay = BehaviorRelay(value: PokemonSectionModel(items: []))
     
@@ -33,18 +35,26 @@ final class MainViewModel: ViewModel {
         input.viewWillAppear
             .take(1)
             .withUnretained(self)
-            .flatMap { vm, _ in
-                vm.fetchNextPage()
-            }.subscribe()
+            .flatMap { vm, _ in vm.fetchNextPage() }
+            .subscribe()
             .disposed(by: disposeBag)
         
         // 스크롤 이벤트로 다음 페이지를 로드
         input.loadNextPageTrigger
             .withUnretained(self)
             .filter { vm, _ in vm.canLoadNextPage() }
-            .flatMapLatest { vm, _ in
-                vm.fetchNextPage()
-            }.subscribe()
+            .flatMapLatest { vm, _ in vm.fetchNextPage() }
+            .subscribe()
+            .disposed(by: disposeBag)
+        
+        input.prefetchTrigger
+            .withUnretained(self)
+            .filter { vm, indexPaths in
+                guard let maxIndex = indexPaths.map({ $0.row }).max() else { return false }
+                
+                return vm.canPrefetch(at: maxIndex)
+            }.flatMapLatest { vm, _ in vm.fetchNextPage() }
+            .subscribe()
             .disposed(by: disposeBag)
         
         // 선택된 아이템의 디테일 ViewModel 생성
@@ -55,6 +65,8 @@ final class MainViewModel: ViewModel {
         return Output(sectionSubject: sectionRelay,
                       detailViewModel: detailViewModel)
     }
+    
+    private func canPrefetch(at maxIndex: Int) -> Bool { maxIndex > currentItemCount - 10 && !isLoading.value }
     
     /**
      다음 페이지를 로드할 수 있는지 확인합니다.

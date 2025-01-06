@@ -73,7 +73,8 @@ final class MainViewController: BaseViewController {
                 .filter { vc, _ in
                     vc.isRead && vc.isNearBottom()
                 }.map { _ in () },
-            selectedItem: collectionView.rx.itemSelected.map { $0.row }
+            selectedItem: collectionView.rx.itemSelected.map { $0.row },
+            prefetchTrigger: collectionView.rx.prefetchItems.asObservable()
         )
         
         let output = viewModel.transform(input: input)
